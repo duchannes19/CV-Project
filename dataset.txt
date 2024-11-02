@@ -1,3 +1,23 @@
 Download the following dataset:
 
 https://www.kaggle.com/datasets/ashishpatel26/facial-expression-recognitionferchallenge?resource=download
+
+Create a conda env with python 3.9 and install the following packages:
+
+For conda install CUDA 11.2 and cuDNN 8.1 with conda-forge (also on the OS I think).
+
+For pip:
+
+pip install tensorflow==2.10.0
+pip install keras==2.10.0
+pip install "numpy<2.0"
+pip install cmake
+pip install pandas
+pip install scikit-learn
+pip install opencv-python
+pip install dlib==19.24.0
+pip install mediapipe==0.10.0
+pip install fastapi==0.70.0
+pip install uvicorn==0.15.0
+
+Hope that it works.
