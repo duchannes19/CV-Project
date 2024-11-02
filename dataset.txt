@@ -19,5 +19,7 @@ pip install dlib==19.24.0
 pip install mediapipe==0.10.0
 pip install fastapi==0.70.0
 pip install uvicorn==0.15.0
+pip install plotly
+pip install scikit-plot
 
 Hope that it works.
