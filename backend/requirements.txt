@@ -1,0 +1,16 @@
+-f https://download.pytorch.org/whl/torch_stable.html
+torch==2.3.0+cpu
+scikit-learn
+numpy
+pandas
+flask
+keras
+transformers
+requests
+python-magic
+pefile
+cryptography
+asn1crypto
+netifaces
+waitress
+pysondb
