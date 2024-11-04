@@ -22,4 +22,8 @@ pip install uvicorn==0.15.0
 pip install plotly
 pip install scikit-plot
 
+
+To run the backend also install the requirements and then:
+waitress-serve --host 127.0.0.1 --port 5000 app:app
+
 Hope that it works.
