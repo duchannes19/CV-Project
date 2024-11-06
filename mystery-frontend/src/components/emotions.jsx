@@ -65,6 +65,16 @@ const EmotionDetector = () => {
       justifyContent="center"
       height="100vh"
     >
+
+      {selectedFile && (
+        <Box mt={3}>
+          <img
+            src={URL.createObjectURL(selectedFile)}
+            alt="Selected"
+            style={{ width: '300px' }}
+          />
+        </Box>
+      )}
       <input
         type="file"
         id="fileInput"

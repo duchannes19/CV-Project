@@ -1,0 +1,17 @@
+/* styles.css */
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: white;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  h1, h2, h3, p {
+    text-shadow: 1px 1px 2px black;
+  }  
