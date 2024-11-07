@@ -12,7 +12,8 @@ function App() {
   React.useEffect(() => {
     const checkOnlineStatus = async () => {
       try {
-        await axios.get('http://localhost:5000');
+        await axios.get('http://localhost:5000/getStatus');
+        setIsOnline(true);
       } catch (error) {
         setIsOnline(false);
       }

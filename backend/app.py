@@ -84,6 +84,10 @@ def preprocess_image(image):
     face = np.expand_dims(face, axis=0)   # Shape: (1, 48, 48, 1)
     return face
 
+@app.route('/getStatus', methods=['GET'])
+def getStatus():
+    return jsonify({'status': 'Model is up and running.'}), 200
+
 @app.route('/health', methods=['GET'])
 def health_check():
     print(f"{Bcolors.OKBLUE}Health Check: Server is running.{Bcolors.ENDC}")
