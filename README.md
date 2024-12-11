@@ -1,6 +1,8 @@
 # CV Project
 
-## Inserire l'immagine di copertina qui.
+<p align="center">
+    <img src="cv.png" alt="Image" width="40%" height="40%">
+</p>
 
 ## General Idea
 """
