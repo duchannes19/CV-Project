@@ -1,6 +1,18 @@
-# Mystery
+# CV Project
 
-This is an emotion recognition from facial expressions has a wide range of applications, from enhancing user interaction in intelligent systems to supporting psychological research. This project seeks to build a model capable of recognizing distinct human emotions by analyzing facial images. Specifically, it classifies images into seven categories: Angry, Disgust, Fear, Happy, Sad, Surprise, and Neutral. This is used to recreat a "Pokemon Mystery Dungeon" personality test.
+## Inserire l'immagine di copertina qui.
+
+## General Idea
+"""
+This project aims to simplify and assist in the recognition of prostate tumors through a user-friendly frontend and a Python backend that handles convolutional neural network (CNN) processing. Specifically, it is a Python backend and Vite.js frontend application focused on the automatic segmentation of prostate cancer regions in MRI and CT images.
+
+Key Features:
+- Utilizes deep learning algorithms and OpenCV for image processing.
+- Employs convolutional neural networks (CNNs) and their variants for accurate segmentation.
+- Informed by the findings in the paper 'Recent Automatic Segmentation Algorithms of MRI Prostate Regions: A Review.'
+
+The frontend, built with Vite.js, provides an intuitive interface for users to upload and visualize MRI and CT images. The backend, developed in Python, processes these images using CNN models to automatically segment and highlight regions affected by prostate cancer.
+"""
 
 ## TO DO:
 - [ ] A lot.

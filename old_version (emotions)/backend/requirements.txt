@@ -14,8 +14,3 @@ asn1crypto
 netifaces
 waitress
 pysondb
-bm3d
-opencv-python
-scipy
-skimage
-pydicom
