@@ -19,3 +19,4 @@ opencv-python
 scipy
 skimage
 pydicom
+gradio
