@@ -1,7 +1,7 @@
 # CV Project
 
 <p align="center">
-    <img src="cv.png" alt="Image" width="40%" height="40%">
+    <img src="cv.png" alt="Image" width="30%" height="30%">
 </p>
 
 ## General Idea
