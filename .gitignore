@@ -3,3 +3,4 @@ backend/datasets/
 model/
 node_modules/
 __pycache__/
+*.keras
