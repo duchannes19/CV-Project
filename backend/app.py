@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 from flask import Flask, request, jsonify, render_template_string, abort
 import tensorflow as tf
 import numpy as np
 import cv2
 import logging
+from bcolors import bcolors
 
 # Basic configuration
 API_KEY = "mysecureapikey"  # Replace with a secure key
 
 # Load model
-model = tf.keras.models.load_model("prostate_segmentation.keras", compile=False)
+try:
+    model = tf.keras.models.load_model("prostate_segmentation.keras", compile=False)    
+    # Loggin with bcolors
+    print(f"{bcolors.OKGREEN}Model loaded successfully.{bcolors.ENDC}")
+    logging.info(f"{bcolors.OKGREEN}Model loaded successfully.{bcolors.ENDC}")
+except Exception as e:
+    logging.error(f"Could not load model: {e}")
+    exit(1)
 
-app = Flask(__name__)
+app = Flask('prostate_segmentation_server')
 logging.basicConfig(level=logging.INFO)
 
 # Simple HTML template for server status page
