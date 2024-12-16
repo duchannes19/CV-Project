@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, LinearProgress } from '@mui/material';
+import { runSegmentation } from '../services/api';
+
+// MOCKUP COMPONENT
 
 export default function UploadImages() {
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [result, setResult] = useState(null);
 
-  const handleFileUpload = (files) => {
+  const handleFileUpload = async (files) => {
     // Simulate upload
-    setUploadProgress(30);
-    setTimeout(()=>setUploadProgress(60), 1000);
-    setTimeout(()=>setUploadProgress(100), 2000);
+    let progress = 0;
+
+    try{
+      const response = await runSegmentation(files[0]);
+
+      if (response.status === 200) {
+        progress = 100;
+        setResult(response.data.overlay);
+      } else {
+        progress = 0;
+      }
+    }
+    catch(error){
+      progress = 0;
+      console.error(error);
+    }
+
   };
 
   return (
@@ -19,6 +37,12 @@ export default function UploadImages() {
         <input type="file" hidden onChange={(e)=>handleFileUpload(e.target.files)} multiple />
       </Button>
       {uploadProgress > 0 && <LinearProgress variant="determinate" value={uploadProgress} sx={{mt:2}} />}
+      {result && 
+      <Box mt={2}>
+        <Typography variant="h6">Segmentation Overlay</Typography>
+        <img src={result} alt="Segmentation Overlay" style={{maxWidth:'100%', marginTop:8}} />
+      </Box>
+      }
     </Box>
   );
 }

@@ -16,5 +16,14 @@ Key Features:
 The frontend, built with Vite.js, provides an intuitive interface for users to upload and visualize MRI and CT images. The backend, developed in Python, processes these images using CNN models to automatically segment and highlight regions affected by prostate cancer.
 """
 
+## Dependencies for Backend
+
+- Python 3.9
+- Anaconda
+- Intall the required envioronment using the following command:
+```bash
+conda env create -f environment.yml
+```
+
 ## TO DO:
 - [ ] A lot.
