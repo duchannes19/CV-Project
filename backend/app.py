@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 import logging
 import base64
+import pydicom
+import io
 from bcolors import bcolors
 
 # Basic configuration
@@ -45,6 +47,51 @@ p { font-size: 1.2rem; }
 </html>
 """
 
+# Utility functions
+def preprocess_image(img):
+    # Preprocess image as done before
+    img = cv2.resize(img, (256,256))
+    img = img.astype(np.float32)
+    img = (img - np.mean(img)) / (np.std(img)+1e-8)
+    # Shape model expects: (1,16,256,256,1)
+    img = np.expand_dims(img, axis=0)       # (1,256,256)
+    img = np.expand_dims(img, axis=0)       # (1,1,256,256)
+    img = np.repeat(img, 16, axis=1)        # (1,16,256,256)
+    img = np.expand_dims(img, axis=-1)      # (1,16,256,256,1)
+    return img
+
+def load_png(file):
+    file_bytes = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_GRAYSCALE)
+    return img
+
+def load_dicom(file):
+    # Read all file bytes
+    file_bytes = file.read()
+    # Reset pointer if needed
+    file.seek(0)
+    # Create a file-like object from the bytes
+    file_like = io.BytesIO(file_bytes)
+
+    # Use dcmread with the file-like object directly
+    dicom_data = pydicom.dcmread(file_like, force=True)
+    
+    img = dicom_data.pixel_array.astype(np.float32)
+    # If 3D volume, select a slice:
+    if img.ndim > 2:
+        mid_slice = img.shape[0] // 2
+        img = img[mid_slice]
+    return img
+
+def create_overlay(original, mask):
+    # Overlay mask (red) onto original grayscale image
+    overlay_img = cv2.cvtColor(original, cv2.COLOR_GRAY2BGR)
+    overlay_img[mask==1] = (0,0,255)
+    _, buffer = cv2.imencode('.png', overlay_img)
+    overlay_bytes = buffer.tobytes()
+    overlay_base64 = "data:image/png;base64," + base64.b64encode(overlay_bytes).decode('utf-8')
+    return overlay_base64
+
 # Enable CORS for all domains on all routes
 
 CORS(app, resources={r"/*": {"origins": "*"}}, 
@@ -71,64 +118,59 @@ def index():
 
 @app.route("/predict", methods=["POST"])
 def predict_segmentation():
-    file = request.files.get('image')
-    if file is None:
-        print(f"{bcolors.FAIL}No image file uploaded{bcolors.ENDC}")
-        return jsonify({"error": "No image file uploaded"}), 400
-    
-    # Check if image is DICOM or PNG (demo logic)
-    if file.filename.endswith('.dcm') is False and file.filename.endswith('.png') is False:
-        print(f"{bcolors.FAIL}Invalid file format. Must be DICOM or PNG{bcolors.ENDC}")
-        return jsonify({"error": "Invalid file format. Must be DICOM or PNG"}), 400
+    if 'files' not in request.files:
+        return jsonify({"error": "No image files uploaded"}), 400
 
-    # Load image (assuming a grayscale PNG for this demonstration)
-    file_bytes = np.frombuffer(file.read(), np.uint8)
-    original_img = cv2.imdecode(file_bytes, cv2.IMREAD_GRAYSCALE)
-    if original_img is None:
-        print(f"{bcolors.FAIL}Could not read image{bcolors.ENDC}")
-        return jsonify({"error": "Could not read image"}), 400
+    files = request.files.getlist('files')
+    if len(files) == 0:
+        return jsonify({"error": "No files selected"}), 400
 
-    # Keep original_img copy for overlay (resize to 256x256 to match model)
-    original_resized = cv2.resize(original_img, (256,256))
-    
-    # Preprocess for inference
-    img = original_resized.astype(np.float32)
-    img = (img - np.mean(img)) / (np.std(img)+1e-8)
-    
-    # The model expects (1,16,256,256,1)
-    img = np.expand_dims(img, axis=0)       # (1,256,256)
-    img = np.expand_dims(img, axis=0)       # (1,1,256,256)
-    img = np.repeat(img, 16, axis=1)        # (1,16,256,256)
-    img = np.expand_dims(img, axis=-1)      # (1,16,256,256,1)
-    
-    # Run inference
-    print(f"{bcolors.OKGREEN}Running inference...{bcolors.ENDC}")
-    try:
-        pred = model.predict(img)
-        print(f"{bcolors.OKGREEN}Inference complete.{bcolors.ENDC}")
-    except Exception as e:
-        print(f"{bcolors.FAIL}Inference failed: {e}{bcolors.ENDC}")
-        return jsonify({"error": "Inference failed"}), 500
-    
-    # Use the middle slice (depth=8) as an example
-    mask = (pred[0,8,:,:,0] > 0.5).astype(np.uint8)  # (256,256)
-    
-    # Overlay mask onto the original_resized image
-    # Convert to BGR
-    overlay_img = cv2.cvtColor(original_resized, cv2.COLOR_GRAY2BGR)
-    
-    # Create a red overlay where mask is 1
-    # For pixels where mask==1, color them red
-    # Red in BGR is (0,0,255)
-    overlay_img[mask==1] = (0,0,255)
-    
-    # Encode to PNG base64
-    _, buffer = cv2.imencode('.png', overlay_img)
-    overlay_bytes = buffer.tobytes()
-    overlay_base64 = "data:image/png;base64," + base64.b64encode(overlay_bytes).decode('utf-8')
-    
-    print(f"{bcolors.OKGREEN}Segmentation complete.{bcolors.ENDC}")
-    return jsonify({"overlay": overlay_base64})
+    overlays = []
+    for file in files:
+        filename = file.filename.lower()
+        if filename.endswith('.dcm'):
+            # DICOM
+            try:
+                original_img = load_dicom(file)
+            except Exception as e:
+                print(bcolors.FAIL + f"Could not read DICOM file: {e}" + bcolors.ENDC)
+                return jsonify({"error": f"Could not read DICOM file: {e}"}), 400
+        elif filename.endswith('.png'):
+            # PNG
+            original_img = load_png(file)
+            if original_img is None:
+                print(bcolors.FAIL + "Could not read PNG image" + bcolors.ENDC)
+                return jsonify({"error": "Could not read PNG image"}), 400
+        else:
+            return jsonify({"error": "Invalid file format. Must be DICOM or PNG"}), 400
+
+        # Preprocess for inference
+        preprocessed = preprocess_image(original_img)
+
+        # Run inference
+        try:
+            pred = model.predict(preprocessed)
+            # See confidence of prediction
+            print(f"Prediction confidence: {np.mean(pred)}")
+        except Exception as e:
+            return jsonify({"error": f"Inference failed: {e}"}), 500
+
+        # Use middle slice in depth dimension:
+        mask = (pred[0,8,:,:,0] > 0.5).astype(np.uint8) # (256,256)
+
+        # Create overlay
+        # Note: original_img should be resized as well to match the overlay
+        # original_resized = cv2.resize(original_img, (256,256))
+        # overlay_base64 = create_overlay(original_resized, mask)
+        
+        # Format the mask as a base64 image
+        _, buffer = cv2.imencode('.png', mask*255)
+        mask_bytes = buffer.tobytes()
+        mask_base64 = "data:image/png;base64," + base64.b64encode(mask_bytes).decode('utf-8')
+        
+        overlays.append(mask_base64)
+
+    return jsonify({"overlays": overlays}), 200
     
 # Error handlers
 @app.errorhandler(401)

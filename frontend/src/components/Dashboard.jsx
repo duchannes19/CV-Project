@@ -51,8 +51,8 @@ export default function Dashboard({ onLogout }) {
 
       <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)} onKeyDown={() => setDrawerOpen(false)}>
-          <List>
-            <ListItem button onClick={() => handleMenuClick('upload')}>
+          <List style={{ cursor: 'pointer' }}>
+            <ListItem button onClick={() => handleMenuClick('upload')} style={{ marginTop: '3.5rem' }}>
               <ListItemText primary="Upload Images" />
             </ListItem>
             <ListItem button onClick={() => handleMenuClick('cases')}>
