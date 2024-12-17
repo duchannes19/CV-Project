@@ -4,3 +4,4 @@ model/
 node_modules/
 __pycache__/
 *.keras
+datasets.zip
