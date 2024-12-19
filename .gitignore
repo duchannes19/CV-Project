@@ -6,3 +6,4 @@ __pycache__/
 *.keras
 datasets.zip
 dataset.zip
+*.h5
