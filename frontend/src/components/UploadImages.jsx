@@ -8,6 +8,7 @@ export default function UploadImages() {
   const [results, setResults] = useState([]);
 
   const handleFileUpload = async (files) => {
+    setUploadColor('primary');
     setUploadProgress(0);
     setResults([]);
 
@@ -40,7 +41,8 @@ export default function UploadImages() {
         console.log("Upload failed with status:", response.data.error);
       }
     } catch (error) {
-      setUploadColor('error');
+      setUploadColor('error'); 
+      setUploadColor(100);
       console.error(error);
       console.log(response.data.error);
     }

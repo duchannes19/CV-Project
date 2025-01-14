@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
-from flask import Flask, request, jsonify, render_template_string, abort
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from tensorflow.keras.models import load_model
-import numpy as np
-import cv2
 import logging
-import base64
-from bcolors import bcolors
+from utils.bcolors import bcolors
 
 # Import utility functions from utility.py
-from utils.utility import preprocess_image, load_png, load_dicom, create_overlay, load_status_page
+from utils.utility import load_status_page
 
 # Load the ensemble models
-from utils.ensemble import load_ensemble
+from utils.ensemble import load_ensemble, get_prediction
+
+# Load the upscale function
+from utils.upscale import upscale_overlays
 
 # Basic configuration
 API_KEY = "mysecureapikey"  # Replace with a secure key
@@ -54,8 +53,7 @@ def index():
 
 
 # TO DO: Refactor the following code to predict segmentation with the ensemble model
-# Also We need other functions to preprocess the image and create the overlay
-# And also integrate ESRGAN for super resolution
+# Also We need other functions to preprocess the image and create the overlay in the utility.py file
 
 @app.route("/predict", methods=["POST"])
 def predict_segmentation():
@@ -66,52 +64,25 @@ def predict_segmentation():
     if len(files) == 0:
         return jsonify({"error": "No files selected"}), 400
 
-    overlays = []
-    for file in files:
-        filename = file.filename.lower()
-        if filename.endswith('.dcm'):
-            # DICOM
-            try:
-                original_img = load_dicom(file)
-            except Exception as e:
-                print(bcolors.FAIL + f"Could not read DICOM file: {e}" + bcolors.ENDC)
-                return jsonify({"error": f"Could not read DICOM file: {e}"}), 400
-        elif filename.endswith('.png'):
-            # PNG
-            original_img = load_png(file)
-            if original_img is None:
-                print(bcolors.FAIL + "Could not read PNG image" + bcolors.ENDC)
-                return jsonify({"error": "Could not read PNG image"}), 400
-        else:
-            return jsonify({"error": "Invalid file format. Must be DICOM or PNG"}), 400
+    print(bcolors.OKBLUE + f"Received {len(files)} files" + bcolors.ENDC)
 
-        # Preprocess for inference
-        preprocessed = preprocess_image(original_img)
+    # Get the prediction from the ensemble model
+    try:
+        overlays = get_prediction(files, model)
+    except Exception as e:
+        print(bcolors.FAIL + f"Prediction failed: {e}" + bcolors.ENDC)
+        return jsonify({"error": "Prediction failed"}), 500
 
-        # Run inference
-        try:
-            pred = model.predict(preprocessed)
-            # See confidence of prediction
-            print(f"Prediction confidence: {np.mean(pred)}")
-        except Exception as e:
-            return jsonify({"error": f"Inference failed: {e}"}), 500
+    print(bcolors.OKGREEN + f"Prediction completed" + bcolors.ENDC)
 
-        # Use middle slice in depth dimension:
-        mask = (pred[0,8,:,:,0] > 0.5).astype(np.uint8) # (256,256)
+    # Upscale the overlays by a factor of 4
+    print(bcolors.OKBLUE + f"Upscaling overlays" + bcolors.ENDC)
 
-        # Create overlay
-        # Note: original_img should be resized as well to match the overlay
-        # original_resized = cv2.resize(original_img, (256,256))
-        # overlay_base64 = create_overlay(original_resized, mask)
-        
-        # Format the mask as a base64 image
-        _, buffer = cv2.imencode('.png', mask*255)
-        mask_bytes = buffer.tobytes()
-        mask_base64 = "data:image/png;base64," + base64.b64encode(mask_bytes).decode('utf-8')
-        
-        overlays.append(mask_base64)
+    upscaled_list = upscale_overlays(overlays, scale_factor=4)
 
-    return jsonify({"overlays": overlays}), 200
+    print(bcolors.OKGREEN + f"Upscaling completed" + bcolors.ENDC)
+
+    return jsonify({"overlays": upscaled_list}), 200
     
 # Error handlers
 @app.errorhandler(401)

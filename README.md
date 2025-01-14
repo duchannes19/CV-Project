@@ -25,5 +25,21 @@ The frontend, built with Vite.js, provides an intuitive interface for users to u
 conda env create -f environment.yml
 ```
 
-## TO DO:
-- [ ] A lot.
+## Dependencies for Frontend
+
+- Install the required packages using the following command:
+```bash
+npm install
+```
+
+## How to run the project
+
+- Run the backend using the following command:
+```bash
+python app.py
+```
+
+- Run the frontend using the following command:
+```bash
+npm run dev
+```
