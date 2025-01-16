@@ -125,11 +125,12 @@ def create_overlay(original_slice, predicted_mask, target_size=(128, 128)):
     Both are 2D arrays (H, W).
     Return base64-encoded PNG of shape (H, W, 3).
     """
-    # Convert original slice to (128,128) for overlay
-    original_resized = cv2.resize(original_slice, target_size, interpolation=cv2.INTER_LINEAR)
+    
+    # Resize the predicted mask to match the original slice size, use the smoothest interpolation
+    predicted_mask = cv2.resize(predicted_mask, original_slice.shape[::-1], interpolation=cv2.INTER_LINEAR)
     
     # Normalize to 0-255 for display
-    original_8u = cv2.normalize(original_resized, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    original_8u = cv2.normalize(original_slice, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
     
     # Convert grayscale to BGR
     overlay_img = cv2.cvtColor(original_8u, cv2.COLOR_GRAY2BGR)
@@ -182,5 +183,7 @@ def get_prediction(files, ensemble_models):
             # Create overlay
             overlay_base64 = create_overlay(original_slice, predicted_mask_2d, target_size=(128, 128))
             overlays.append(overlay_base64)
+            
+            
     
     return overlays

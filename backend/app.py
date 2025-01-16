@@ -78,7 +78,7 @@ def predict_segmentation():
     # Upscale the overlays by a factor of 4
     print(bcolors.OKBLUE + f"Upscaling overlays" + bcolors.ENDC)
 
-    upscaled_list = upscale_overlays(overlays, scale_factor=4)
+    upscaled_list = upscale_overlays(overlays, scale_factor=2)
 
     print(bcolors.OKGREEN + f"Upscaling completed" + bcolors.ENDC)
 
