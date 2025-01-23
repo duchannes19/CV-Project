@@ -36,9 +36,9 @@ def load_ensemble():
     Adjust model_paths to match your environment.
     """
     model_paths = [
-        "best_model_residual_spatial_dropout.keras",
-        "best_model_residual_attention.keras",
-        "best_model_residual_se.keras"
+        "final_model_residual_spatial_dropout.keras",
+        "final_model_residual_attention.keras",
+        "final_model_residual_se.keras"
     ]
 
     ensemble_models = []
@@ -103,6 +103,17 @@ def preprocess_slice_2d(slice_2d, target_size=(128, 128)):
     input_4d = np.expand_dims(normalized, axis=(0, -1))  # shape: (1, 128, 128, 1)
     return input_4d
 
+# define a function to extract from the predicted mask the largest connected component
+def largest_connected_component(mask):
+    # find all connected components (0: background, 1: connected component)
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=4)
+    # find the largest connected component
+    largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
+    # create a mask with only the largest connected component
+    mask = np.zeros_like(mask)
+    mask[labels == largest_label] = 1
+    return mask
+
 def ensemble_predict_slice(models, slice_2d):
     """
     Generate ensemble prediction for a single 2D slice.
@@ -117,6 +128,10 @@ def ensemble_predict_slice(models, slice_2d):
         preds.append(p)
     avg_pred = np.mean(preds, axis=0)  # shape: (1, 128, 128, 1)
     mask_2d = (avg_pred[0, :, :, 0] > 0.5).astype(np.uint8)  # shape: (128,128)
+    # If mask is empty, return it as is
+    if np.sum(mask_2d) == 0:
+        return mask_2d
+    mask_2d = largest_connected_component(mask_2d)
     return mask_2d
 
 def create_overlay(original_slice, predicted_mask, target_size=(128, 128)):

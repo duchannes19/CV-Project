@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Box, Button, Typography, LinearProgress, Modal } from '@mui/material';
 import { runSegmentation } from '../services/api';
 
-export default function UploadImages() {
+export default function UploadImages({ results, setResults }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadColor, setUploadColor] = useState('primary');
-  const [results, setResults] = useState([]);
+  // Get the results from the session storage if available
   const [currentSlice, setCurrentSlice] = useState(0); // Track the current image slice
   const [showSingleElements, setShowSingleElements] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState(null); // Track the image to display full screen
+
+  const [showAdvancements, setShowAdvancements] = useState('');
 
   const handleFileUpload = async (files) => {
     setUploadColor('primary');
@@ -34,18 +36,24 @@ export default function UploadImages() {
     };
 
     try {
+      setShowAdvancements('Uploading files...');
       const response = await runSegmentation(formData, config);
 
       if (response.status === 200) {
         // response.data.overlays is expected to be an array of base64 strings
         setResults(response.data.overlays);
+        // Save the results to the session storage
+        //localStorage.setItem('segmentationResults', JSON.stringify(response.data.overlays));
+        setShowAdvancements('Upload successful!');
         setUploadColor('success');
       } else {
         setUploadColor('error');
+        setShowAdvancements('Upload failed. Please try again.');
         console.log('Upload failed with status:', response.data.error);
       }
     } catch (error) {
       setUploadColor('error');
+      setShowAdvancements('Upload failed. Please try again.');
       console.error(error);
     }
   };
@@ -70,10 +78,15 @@ export default function UploadImages() {
 
   return (
     <Box sx={{ margin: 'auto', textAlign: 'center', mt: 4 }}>
-      <Typography variant="h5" mb={2}>
-        Upload Medical Images
-      </Typography>
-      <Button variant="contained" component="label" style={{ marginTop: '1rem' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <img src="/cv.png" alt="Logo" style={{ width: '5rem', height: '5rem' }} />
+        <Typography variant="h5" mb={2}>
+          Upload Medical Images
+        </Typography>
+        {/*Mirror the first image*/}
+        <img src="/cv.png" alt="Logo" style={{ width: '5rem', height: '5rem', transform: 'scaleX(-1)' }} />
+      </Box>
+      <Button variant="contained" component="label" style={{ marginTop: '3rem' }}>
         Select Files
         <input type="file" hidden multiple onChange={(e) => handleFileUpload(e.target.files)} />
       </Button>
@@ -96,6 +109,11 @@ export default function UploadImages() {
           color={uploadColor}
         />
       )}
+      {uploadProgress > 0 &&
+        <Typography variant="h6" mt={2}>
+          {showAdvancements}
+        </Typography>
+      }
       {!showSingleElements && results.length > 0 && (
         <Box mt={8} onWheel={handleScroll} sx={{ textAlign: 'center' }}>
           <Typography variant="h6" mb={2}>

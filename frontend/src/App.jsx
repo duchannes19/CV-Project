@@ -10,6 +10,7 @@ import { isAuthenticated } from './services/auth';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('login'); // 'login' or 'dashboard'
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -47,7 +48,7 @@ export default function App() {
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.5 }}
           >
-            <Dashboard onLogout={handleLogout} />
+            <Dashboard onLogout={handleLogout} results={results} setResults={setResults} />
           </motion.div>
         )}
       </AnimatePresence>

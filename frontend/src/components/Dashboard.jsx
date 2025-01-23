@@ -9,7 +9,7 @@ import CaseReview from './CaseReview';
 import ExportModal from './ExportModal';
 import { logout } from '../services/auth';
 
-export default function Dashboard({ onLogout }) {
+export default function Dashboard({ onLogout, results, setResults }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('upload'); // 'upload', 'cases', 'export', 'review'
   const [selectedCase, setSelectedCase] = useState(null);
@@ -52,13 +52,7 @@ export default function Dashboard({ onLogout }) {
       <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)} onKeyDown={() => setDrawerOpen(false)}>
           <List style={{ cursor: 'pointer' }}>
-            <ListItem button onClick={() => handleMenuClick('upload')} style={{ marginTop: '3.5rem' }}>
-              <ListItemText primary="Upload Images" />
-            </ListItem>
-            <ListItem button onClick={() => handleMenuClick('cases')}>
-              <ListItemText primary="Review Cases" />
-            </ListItem>
-            <ListItem button onClick={handleExport}>
+            <ListItem onClick={handleExport} style={{ marginTop: '3.5rem' }}>
               <ListItemText primary="Export Results" />
             </ListItem>
           </List>
@@ -75,7 +69,7 @@ export default function Dashboard({ onLogout }) {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.5 }}
             >
-              <UploadImages />
+              <UploadImages results={results} setResults={setResults} />
             </motion.div>
           )}
 
@@ -105,7 +99,7 @@ export default function Dashboard({ onLogout }) {
         </AnimatePresence>
       </Box>
 
-      <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
+      <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} results={results} />
     </Box>
   );
 }
