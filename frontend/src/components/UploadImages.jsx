@@ -81,26 +81,27 @@ export default function UploadImages({ results, setResults }) {
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <img src="/cv.png" alt="Logo" style={{ width: '5rem', height: '5rem' }} />
         <Typography variant="h5" mb={2}>
-          Upload Medical Images
+          Upload MRI
         </Typography>
         {/*Mirror the first image*/}
         <img src="/cv.png" alt="Logo" style={{ width: '5rem', height: '5rem', transform: 'scaleX(-1)' }} />
       </Box>
-      <Button variant="contained" component="label" style={{ marginTop: '3rem' }}>
-        Select Files
-        <input type="file" hidden multiple onChange={(e) => handleFileUpload(e.target.files)} />
-      </Button>
-      {results.length > 0 && (
-        <Button
-          variant="contained"
-          color="secondary"
-          component="label"
-          onClick={() => setShowSingleElements((prev) => !prev)}
-          sx={{ marginTop: '1rem', marginLeft: '1rem' }}
-        >
-          {showSingleElements ? 'Show All' : 'Show Single'}
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '2rem', marginTop: '5rem' }}>
+        <Button variant="contained" component="label">
+          Select Files
+          <input type="file" hidden multiple onChange={(e) => handleFileUpload(e.target.files)} />
         </Button>
-      )}
+        {results.length > 0 && (
+          <Button
+            variant="contained"
+            color="secondary"
+            component="label"
+            onClick={() => setShowSingleElements((prev) => !prev)}
+          >
+            {showSingleElements ? 'Show All' : 'Show Single'}
+          </Button>
+        )}
+      </Box>
       {uploadProgress > 0 && (
         <LinearProgress
           variant="determinate"

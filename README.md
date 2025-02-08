@@ -5,16 +5,16 @@
 </p>
 
 ## General Idea
-"""
-This project aims to simplify and assist in the recognition of prostate tumors through a user-friendly frontend and a Python backend that handles convolutional neural network (CNN) processing. Specifically, it is a Python backend and Vite.js frontend application focused on the automatic segmentation of prostate cancer regions in MRI and CT images.
+
+Hello!
+
+This project aims to simplify and assist in the recognition of the prostate through a user-friendly frontend and a Python backend that handles convolutional neural network (CNN) processing. Specifically, it is a Python backend and Vite.js frontend application focused on the automatic segmentation of prostate cancer regions in MRI and CT images.
 
 Key Features:
-- Utilizes deep learning algorithms and OpenCV for image processing.
-- Employs convolutional neural networks (CNNs) and their variants for accurate segmentation.
+- Employs convolutional neural networks (Unet CNNs) and their variants for segmentation.
 - Informed by the findings in the paper 'Recent Automatic Segmentation Algorithms of MRI Prostate Regions: A Review.'
 
 The frontend, built with Vite.js, provides an intuitive interface for users to upload and visualize MRI and CT images. The backend, developed in Python, processes these images using CNN models to automatically segment and highlight regions affected by prostate cancer.
-"""
 
 ## Dependencies for Backend
 
